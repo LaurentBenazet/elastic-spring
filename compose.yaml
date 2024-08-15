@@ -1,15 +1,17 @@
 services:
   elasticsearch:
     container_name: elasticsearch
-    image: 'docker.elastic.co/elasticsearch/elasticsearch:7.17.10'
+    image: 'docker.elastic.co/elasticsearch/elasticsearch:8.8.1'
     environment:
-      - 'ELASTIC_PASSWORD=secret'
       - 'discovery.type=single-node'
       - 'xpack.security.enabled=false'
     ports:
       - "9200:9200"
-    networks:
-      - spring-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9200" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
   spring-elastic:
     container_name: spring-elastic
     build:
@@ -18,8 +20,6 @@ services:
     image: spring-elastic:latest
     ports:
       - "8080:8080"
-    networks:
-      - spring-network
-networks:
-  spring-network:
-    driver: bridge
+    depends_on:
+      elasticsearch:
+        condition: service_healthy

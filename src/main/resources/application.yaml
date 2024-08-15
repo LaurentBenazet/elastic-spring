@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: spring-elastic
+    
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
