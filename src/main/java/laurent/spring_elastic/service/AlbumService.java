@@ -5,6 +5,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 public interface AlbumService {
     Page<Album> findByReleaseYear(String release, Pageable pageable);
@@ -13,5 +16,9 @@ public interface AlbumService {
 
     Page<Album> findByReleaseYearAndTitleContains(String release, String title, Pageable pageable);
 
-    Album findById(String id);
+    Optional<Album> findById(String id);
+
+    void saveAll(List<Album> albums);
+
+    Page<Album> findAll(Pageable pageable);
 }

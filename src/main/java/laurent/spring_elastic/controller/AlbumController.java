@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/api/v1/albums")
 @RequiredArgsConstructor
@@ -32,7 +34,12 @@ public class AlbumController {
     }
 
     @GetMapping("/{id}")
-    public Album getAlbumById(@PathVariable("id") String id) {
+    public Optional<Album> getAlbumById(@PathVariable("id") String id) {
         return albumService.findById(id);
+    }
+
+    @GetMapping("/")
+    public Page<Album> getAllAlbums(Pageable pageable) {
+        return albumService.findAll(pageable);
     }
 }

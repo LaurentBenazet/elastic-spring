@@ -16,9 +16,11 @@ connection error :(
 
 [Access swagger at this address](http://localhost:8080/swagger-ui/index.html#/)
 
-TODO :
-
-- store albums in elastic search
-- tests
-- search albums (/albums) + search params
-- view album details (/album/id)
+On swagger, use this for the pageable object (the default object fails) :
+``{
+  "page": 0,
+  "size": 10,
+  "sort": [
+    ""
+  ]
+}``

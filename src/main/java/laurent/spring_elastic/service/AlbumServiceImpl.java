@@ -7,6 +7,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class AlbumServiceImpl implements AlbumService {
@@ -28,7 +31,17 @@ public class AlbumServiceImpl implements AlbumService {
     }
 
     @Override
-    public Album findById(String id) {
+    public Optional<Album> findById(String id) {
         return albumRepository.findById(id);
+    }
+
+    @Override
+    public void saveAll(List<Album> albums) {
+        albumRepository.saveAll(albums);
+    }
+
+    @Override
+    public Page<Album> findAll(Pageable pageable) {
+        return albumRepository.findAll(pageable);
     }
 }
