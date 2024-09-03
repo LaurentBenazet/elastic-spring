@@ -17,8 +17,8 @@ public class Album {
     private String title;
     @Field(type = FieldType.Text, name = "artist")
     private String artist;
-    @Field(type = FieldType.Text, name = "releaseYear")
-    private String releaseYear;
+    @Field(type = FieldType.Integer, name = "releaseYear")
+    private int releaseYear;
     @Field(type = FieldType.Text, name = "coverURL")
     private String coverURL;
 }

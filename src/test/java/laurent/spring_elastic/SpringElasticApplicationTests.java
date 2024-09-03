@@ -1,5 +1,6 @@
 package laurent.spring_elastic;
 
+import co.elastic.clients.elasticsearch._types.aggregations.LongTermsBucket;
 import laurent.spring_elastic.controller.AlbumController;
 import laurent.spring_elastic.model.Album;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
+import org.springframework.data.elasticsearch.core.SearchPage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,24 +38,24 @@ class SpringElasticApplicationTests {
 
     @Test
     void canSearchByReleaseYear() {
-        Iterable<Album> albums = albumController.getAlbumsByReleaseYear("1998", PageRequest.of(0, 10));
+        Iterable<Album> albums = albumController.getAlbumsByReleaseYear(1998, PageRequest.of(0, 10));
         List<Album> albumList = new ArrayList<>();
         albums.forEach(albumList::add);
 
         assert (albumList.size() == 10);
         for (Album album : albumList) {
-            assert (album.getReleaseYear().equals("1998"));
+            assert (album.getReleaseYear() == 1998);
         }
     }
 
     @Test
     void canSearchByTitleAndReleaseYear() {
-        Iterable<Album> albums = albumController.getAlbumsByReleaseYearAndTitle("1998", "Headhunter", PageRequest.of(0, 10));
+        Iterable<Album> albums = albumController.getAlbumsByReleaseYearAndTitle(1998, "Headhunter", PageRequest.of(0, 10));
         List<Album> albumList = new ArrayList<>();
         albums.forEach(albumList::add);
 
         assert (albumList.size() == 1);
-        assert (albumList.get(0).getReleaseYear().equals("1998"));
+        assert (albumList.get(0).getReleaseYear() == 1998);
         assert (albumList.get(0).getTitle().equals("Headhunter"));
     }
 
@@ -62,5 +65,34 @@ class SpringElasticApplicationTests {
 
         assert (album.isPresent());
         assert (album.get().getTitle().equals("Under the Stars"));
+    }
+
+    @Test
+    void findByTitleAggregation() {
+        SearchPage<Album> searchPage = albumController.findByTitleWithReleaseYearCount("Exile", PageRequest.of(0, 10));
+
+        assert (searchPage.getSearchHits().stream().count() == 2);
+
+        ElasticsearchAggregations aggregations = (ElasticsearchAggregations) searchPage.getSearchHits().getAggregations();
+        assert aggregations != null;
+        List<LongTermsBucket> buckets = aggregations.aggregationsAsMap().get("countByReleaseYear").aggregation().getAggregate().lterms().buckets().array();
+
+        assert (buckets.size() == 2);
+        assert ((buckets.get(0).key() == 1990 && (buckets.get(0)).docCount() == 1));
+        assert ((buckets.get(1).key() == 1997 && (buckets.get(1)).docCount() == 1));
+    }
+
+    @Test
+    void findAllAggregation() {
+        SearchPage<Album> searchPage = albumController.findAllWithReleaseYearCount(PageRequest.of(0, 10));
+
+        ElasticsearchAggregations aggregations = (ElasticsearchAggregations) searchPage.getSearchHits().getAggregations();
+        assert aggregations != null;
+        List<LongTermsBucket> buckets = aggregations.aggregationsAsMap().get("countByReleaseYear").aggregation().getAggregate().lterms().buckets().array();
+
+        assert (searchPage.getSearchHits().stream().count() == 10);
+        assert (searchPage.getSearchHits().getTotalHits() == 1000);
+        assert (buckets.size() == 43);
+        assert ((buckets.get(1).key() == 1999 && (buckets.get(1)).docCount() == 89));
     }
 }
