@@ -9,9 +9,10 @@ services:
       - "9200:9200"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9200" ]
-      interval: 30s
+      interval: 10s
       timeout: 10s
       retries: 5
+    network_mode: "host"
   spring-elastic:
     container_name: spring-elastic
     build:
@@ -23,3 +24,4 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
+    network_mode: "host"
